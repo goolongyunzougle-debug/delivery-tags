@@ -71,24 +71,25 @@
                     :class="{'border-emerald-500/30 ring-1 ring-emerald-500/20': item.selectedOptions.length > 0}"
                 >
                     <div class="flex items-start justify-between gap-4 mb-4">
-                        <div class="flex items-start gap-3">
-                            <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-slate-800 text-xs font-bold text-slate-400 mt-0.5">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-slate-800 text-xs font-bold text-slate-400 mt-0.5 shrink-0">
                                 {{ index + 1 }}
                             </span>
-                            <div>
-                                <h3 class="text-base font-semibold text-slate-200">{{ item.address }}</h3>
+                            <div class="min-w-0">
+                                <h3 class="text-base font-semibold text-slate-200 break-all">{{ item.address }}</h3>
                             </div>
                         </div>
+                        
                         <span 
                             v-if="item.selectedOptions.length > 0" 
-                            class="flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shadow-sm"
+                            class="flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shadow-sm shrink-0 whitespace-nowrap"
                         >
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             已选择
                         </span>
                         <span 
                             v-else 
-                            class="text-xs font-medium text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700"
+                            class="text-xs font-medium text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700 shrink-0 whitespace-nowrap"
                         >
                             待选择
                         </span>
@@ -156,10 +157,10 @@
                 >
                     <div class="flex flex-col gap-3">
                         <div class="flex items-start gap-3">
-                            <span class="flex items-center justify-center w-5 h-5 rounded bg-slate-800 text-xs font-semibold text-slate-400 mt-0.5">
+                            <span class="flex items-center justify-center w-5 h-5 rounded bg-slate-800 text-xs font-semibold text-slate-400 mt-0.5 shrink-0">
                                 {{ index + 1 }}
                             </span>
-                            <h3 class="text-base font-semibold text-slate-200 tracking-wide">{{ item.address }}</h3>
+                            <h3 class="text-base font-semibold text-slate-200 tracking-wide break-all">{{ item.address }}</h3>
                         </div>
                         
                         <div class="flex flex-wrap gap-2 pl-8 mt-1">
@@ -200,11 +201,10 @@
 
         createApp({
             setup() {
-                // 页面视图路由状态控制：'tagging' 为录入页，'dashboard' 为历史标签看板页
                 const currentView = ref('tagging'); 
                 
                 const addressList = ref([]);
-                const completedAddressList = ref([]); // 存放已存入数据库的带有标签的列表
+                const completedAddressList = ref([]);
                 const loading = ref(true);
                 const loadingDashboard = ref(false);
                 const submitting = ref(false);
@@ -228,7 +228,6 @@
                     setTimeout(() => { toast.value.show = false; }, 3000);
                 };
 
-                // 抓取未完成地址
                 const fetchAddresses = async () => {
                     if (isConfigMissing.value) return;
                     try {
@@ -252,7 +251,6 @@
                     }
                 };
 
-                // 抓取已完成的带有标签数据的地址 (看板页数据源)
                 const fetchCompletedAddresses = async () => {
                     if (isConfigMissing.value) return;
                     try {
@@ -261,7 +259,7 @@
                             .from('delivery_addresses')
                             .select('*')
                             .eq('is_completed', true)
-                            .order('id', { ascending: false }); // 最新的排在前面
+                            .order('id', { ascending: false });
 
                         if (error) throw error;
                         completedAddressList.value = data;
@@ -272,7 +270,6 @@
                     }
                 };
 
-                // 视图路由切换控制
                 const switchView = (viewName) => {
                     currentView.value = viewName;
                     if (viewName === 'tagging') {
@@ -282,7 +279,6 @@
                     }
                 };
 
-                // 针对不同标签在看板渲染不同颜色高亮
                 const getTagStyle = (tagText) => {
                     if (tagText === '超级容易送') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                     if (tagText === '不能骑车') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
@@ -299,7 +295,6 @@
                     return addressList.value.every(item => item.selectedOptions.length > 0);
                 });
 
-                // 提交并跳转
                 const submitData = async () => {
                     if (!canSubmit.value || submitting.value || isConfigMissing.value) return;
 
@@ -320,7 +315,6 @@
 
                         showToast("数据保存成功，正在生成你的避坑看板...");
                         
-                        // 🟢 【核心逻辑：修改这里】延迟 1 秒后自动切换到数据历史看板页面展示数据
                         setTimeout(() => {
                             switchView('dashboard');
                         }, 1200);
