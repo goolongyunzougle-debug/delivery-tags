@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>外卖配送地址标签系统</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- Supabase JS CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -29,7 +26,6 @@
 <body class="text-slate-100 min-h-screen antialiased py-8 px-4 sm:px-6 lg:px-8">
     <div id="app" class="max-w-4xl mx-auto">
         
-        <!-- 头部区域 -->
         <header class="text-center mb-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                 外卖地址配送标签系统
@@ -39,19 +35,16 @@
             </p>
         </header>
 
-        <!-- 配置提示区域 (未配置 Supabase 时显示) -->
         <div v-if="isConfigMissing" class="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-sm">
             <p class="font-semibold mb-1">⚠️ 需要配置 Supabase 密钥</p>
-            <p>请用代码编辑器打开本文件，搜索并修改 <code class="bg-amber-950/50 px-1 py-0.5 rounded text-amber-200">SUPABASE_URL</code> 和 <code class="bg-amber-950/50 px-1 py-0.5 rounded text-amber-200">SUPABASE_ANON_KEY</code>，才能正常拉取和提交数据。</p>
+            <p>请用代码编辑器打开本文件，搜索并修改 <code class="bg-amber-950/50 px-1 py-0.5 rounded text-amber-200">SUPABASE_URL</code> 和 <code class="bg-amber-950/50 px-1 py-0.5 rounded text-amber-200">SUPABASE_ANON_KEY</code>。</p>
         </div>
 
-        <!-- 加载状态 -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-2 border-emerald-500 border-t-transparent"></div>
             <p class="mt-4 text-slate-400 text-sm">正在加载地址库数据...</p>
         </div>
 
-        <!-- 主体列表 -->
         <div v-else-if="addressList.length > 0" class="space-y-4">
             <div 
                 v-for="(item, index) in addressList" 
@@ -68,7 +61,6 @@
                             <h3 class="text-base font-semibold text-slate-200">{{ item.address }}</h3>
                         </div>
                     </div>
-                    <!-- 状态指示器 -->
                     <span 
                         v-if="item.selectedOptions.length > 0" 
                         class="flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"
@@ -84,7 +76,6 @@
                     </span>
                 </div>
 
-                <!-- 4个选项的网格布局 -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-9">
                     <label 
                         v-for="opt in options" 
@@ -105,7 +96,6 @@
                 </div>
             </div>
 
-            <!-- 底部提交操作栏 -->
             <div class="mt-8 glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 shadow-2xl">
                 <div class="text-sm text-slate-400 text-center sm:text-left">
                     进度：<span class="font-bold text-slate-200">{{ completedCount }}</span> / <span class="text-slate-500">{{ addressList.length }}</span> 个地址已选定
@@ -125,10 +115,9 @@
         </div>
 
         <div v-else class="text-center py-20 glass-card rounded-2xl">
-            <p class="text-slate-400">数据库里还没有地址，请前往 Supabase 后台录入几条吧！</p>
+            <p class="text-slate-400">所有地址已标记完成，或者数据库里暂时没有未处理的地址。</p>
         </div>
 
-        <!-- 极简提示组件 (Toast) -->
         <div v-if="toast.show" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300">
             <div :class="toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'" class="px-6 py-3 rounded-xl shadow-xl font-medium text-sm flex items-center gap-2">
                 <span>{{ toast.message }}</span>
@@ -140,7 +129,7 @@
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
 
-        // 🟢 【配置关键】请在这里填入你的 Supabase 凭证
+        // 🟢 已自动保留你配置好的真实凭证
         const SUPABASE_URL = "https://ybjgkfhcagqqfnqekycr.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InliamdrZmhjYWdxcWZucWVreWNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTk0OTUsImV4cCI6MjA5NzI3NTQ5NX0.jG4Hm9JPPBQ9J4jQKCtZDa5MDF_vGYlUo7drur8Xv6g";
 
@@ -152,7 +141,6 @@
                 const isConfigMissing = ref(SUPABASE_URL.includes("YOUR_"));
                 const toast = ref({ show: false, message: '', type: 'success' });
 
-                // 4个标准的现代化选项及激活状态样式
                 const options = [
                     { id: 1, text: "超级容易送", activeClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" },
                     { id: 2, text: "不能骑车", activeClass: "bg-amber-500/10 text-amber-400 border-amber-500/30" },
@@ -160,34 +148,24 @@
                     { id: 4, text: "其他原因不好配送", activeClass: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30" }
                 ];
 
-                let supabase = null;
+                // 🛠️ 修复核心：显式调用 window.supabase 避免变量重名冲突
+                let supabaseClient = null;
                 if (!isConfigMissing.value) {
-                    supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 }
 
-                // 弹出轻提示
                 const showToast = (msg, type = 'success') => {
                     toast.value = { show: true, message: msg, type };
                     setTimeout(() => { toast.value.show = false; }, 3000);
                 };
 
-                // 从 Supabase 拉取未完成勾选的数据
                 const fetchAddresses = async () => {
-                    if (isConfigMissing.value) {
-                        // 兜底 Mock 数据，方便直接本地双击预览
-                        addressList.value = [
-                            { id: 1, address: "杭州市西湖区西溪路阿里巴巴西溪园区北门", selectedOptions: [] },
-                            { id: 2, address: "文三路东方通信大厦A座(电梯控制严格)", selectedOptions: [] },
-                            { id: 3, address: "古墩路绿城西溪蝶园2期-5栋(需步行刷卡)", selectedOptions: [] }
-                        ];
-                        loading.value = false;
-                        return;
-                    }
+                    if (isConfigMissing.value) return;
 
                     try {
                         loading.value = true;
-                        // 查询尚未被标记为已完成的所有外卖地址
-                        const { data, error } = await supabase
+                        // 只拉取 is_completed 为 false 的未标记地址
+                        const { data, error } = await supabaseClient
                             .from('delivery_addresses')
                             .select('*')
                             .eq('is_completed', false)
@@ -195,7 +173,6 @@
 
                         if (error) throw error;
 
-                        // 组装数据结构，若 tags 本身有旧数据则初始化，否则为空数组
                         addressList.value = data.map(item => ({
                             id: item.id,
                             address: item.address,
@@ -209,40 +186,35 @@
                     }
                 };
 
-                // 计算属性：统计多少个地址已经选了标签
                 const completedCount = computed(() => {
                     return addressList.value.filter(item => item.selectedOptions.length > 0).length;
                 });
 
-                // 计算属性：【核心校验逻辑】每个地址都必须选了至少1项，才能提交
                 const canSubmit = computed(() => {
                     if (addressList.value.length === 0) return false;
                     return addressList.value.every(item => item.selectedOptions.length > 0);
                 });
 
-                // 提交到 Supabase 数据库
                 const submitData = async () => {
                     if (!canSubmit.value || submitting.value || isConfigMissing.value) return;
 
                     try {
                         submitting.value = true;
                         
-                        // 准备 upsert 批量更新数据包
                         const updates = addressList.value.map(item => ({
                             id: item.id,
                             address: item.address,
-                            tags: item.selectedOptions, // 直接把前端数组存入 jsonb/数组 字段中
-                            is_completed: true          // 标记为已完成状态
+                            tags: item.selectedOptions, 
+                            is_completed: true          
                         }));
 
-                        const { error } = await supabase
+                        const { error } = await supabaseClient
                             .from('delivery_addresses')
                             .upsert(updates, { onConflict: 'id' });
 
                         if (error) throw error;
 
                         showToast("数据全部同步至 Supabase 成功！");
-                        // 延迟刷新列表，把已提交完的过滤掉
                         setTimeout(() => {
                             fetchAddresses();
                         }, 1500);
